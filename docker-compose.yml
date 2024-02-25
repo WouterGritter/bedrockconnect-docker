@@ -12,18 +12,6 @@ services:
       test: [ 'CMD', 'healthcheck.sh', '--su-mysql', '--connect', '--innodb_initialized' ]
       timeout: 10s
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    environment:
-      PMA_ARBITRARY: 1
-      PMA_HOST: mariadb
-      PMA_USER: root
-    ports:
-      - '8080:80'
-    depends_on:
-      mariadb:
-        condition: service_healthy
-
   bedrockconnect:
     build: './bedrockconnect'
     environment:
@@ -40,3 +28,15 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   environment:
+  #     PMA_ARBITRARY: 1
+  #     PMA_HOST: mariadb
+  #     PMA_USER: root
+  #   ports:
+  #     - '8080:80'
+  #   depends_on:
+  #     mariadb:
+  #       condition: service_healthy
