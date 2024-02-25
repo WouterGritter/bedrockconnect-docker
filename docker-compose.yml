@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MYSQL_DATABASE: bedrock-connect
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    healthcheck:
+      interval: 10s
+      retries: 3
+      test: [ 'CMD', 'healthcheck.sh', '--su-mysql', '--connect', '--innodb_initialized' ]
+      timeout: 10s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mariadb
+      PMA_USER: root
+    ports:
+      - '8080:80'
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  bedrockconnect:
+    build: './bedrockconnect'
+    environment:
+      BC_MYSQL_HOST: mariadb
+      BC_MYSQL_DB: bedrock-connect
+      BC_MYSQL_USER: root
+      BC_MYSQL_PASS: ''
+      BC_CUSTOM_SERVERS: '/app/custom-servers.json'
+    volumes:
+      - './custom-servers.json:/app/custom-servers.json'
+    ports:
+      - '19132:19132/tcp'
+      - '19132:19132/udp'
+    depends_on:
+      mariadb:
+        condition: service_healthy
